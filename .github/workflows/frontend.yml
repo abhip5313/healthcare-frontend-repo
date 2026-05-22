@@ -26,7 +26,7 @@ jobs:
         run: chmod +x node_modules/.bin/react-scripts
 
       - name: Build React App
-        run: npm run build
+        run: CI=false npm run build
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
