@@ -63,7 +63,7 @@ export default function HomePage() {
     },
     {
       icon: '👨‍⚕️',
-      title: 'Expert Doctors',
+      title: 'Expert Drs & Specialists',
       desc: 'Browse specialists across every field. Read reviews, check availability, and book in seconds.',
       color: '#6366f1',
     },
