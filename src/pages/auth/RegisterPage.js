@@ -5,7 +5,9 @@ import FormInput from '../../components/ui/FormInput';
 import FormSelect from '../../components/ui/FormSelect';
 import toast from 'react-hot-toast';
 
-const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/v1/auth';
+const API_BASE = process.env.REACT_APP_API_BASE_URL 
+  ? `${process.env.REACT_APP_API_BASE_URL}/auth`
+  : 'http://localhost:8000/api/v1/auth';
 
 const ROLE_OPTIONS = [
   { value: 'PATIENT', label: 'Patient' },

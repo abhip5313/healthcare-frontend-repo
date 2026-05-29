@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 
-const WS_BASE = 'ws://localhost:8000/ws/chat';
+const WS_BASE = process.env.REACT_APP_API_BASE_URL
+  ? process.env.REACT_APP_API_BASE_URL.replace('https://', 'wss://').replace('http://', 'ws://').replace('/api/v1', '') + '/ws/chat'
+  : 'ws://localhost:8000/ws/chat';
 
 export function useChatWebSocket(roomId, onMessage) {
   const wsRef        = useRef(null);

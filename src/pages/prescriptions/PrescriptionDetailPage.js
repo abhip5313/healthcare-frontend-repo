@@ -26,7 +26,7 @@ function PrescriptionDetailPage() {
     try {
       const token    = localStorage.getItem('access_token');
       const response = await fetch(
-        `http://localhost:8000/api/v1/prescriptions/${id}/download-pdf/`,
+        `${process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api/v1'}/prescriptions/${id}/download-pdf/`,
         {
           method:  'GET',
           headers: { Authorization: `Bearer ${token}` },
