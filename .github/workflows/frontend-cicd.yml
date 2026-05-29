@@ -1,0 +1,101 @@
+# ─────────────────────────────────────────────────────────────
+#  Frontend CI/CD Pipeline
+#  Trigger: main branch ला push झाल्यावर automatically run होतो
+#
+#  Steps:
+#    1. Code checkout
+#    2. Node.js setup
+#    3. Dependencies install
+#    4. Production build
+#    5. S3 upload
+#    6. CloudFront cache invalidate
+# ─────────────────────────────────────────────────────────────
+
+name: Frontend CI/CD
+
+# ── Trigger ───────────────────────────────────────────────────
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:    # Manual trigger
+
+# ── Job ───────────────────────────────────────────────────────
+jobs:
+  deploy:
+    name: Build & Deploy to S3
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Code checkout
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Node.js setup
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"          # node_modules cache — fast build
+
+      # Step 3: Dependencies install
+      - name: Install dependencies
+        run: |
+          npm ci
+          chmod +x node_modules/.bin/react-scripts
+
+      # Step 4: Production build
+      # GitHub Secret मधून REACT_APP_ variables inject होतात
+      - name: Build React app
+        env:
+          REACT_APP_API_BASE_URL: ${{ secrets.REACT_APP_API_BASE_URL }}
+          REACT_APP_NAME:         HealthCare Platform
+          CI: false
+        run: npm run build
+
+      # Step 5: AWS credentials configure
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            ${{ secrets.AWS_REGION }}
+
+      # Step 6: HTML files upload (no cache)
+      - name: Upload HTML to S3
+        run: |
+          aws s3 sync build/ s3://${{ secrets.S3_FRONTEND_BUCKET }}/ \
+            --region ${{ secrets.AWS_REGION }} \
+            --delete \
+            --exclude "*.js" \
+            --exclude "*.css" \
+            --exclude "*.png" \
+            --exclude "*.jpg" \
+            --exclude "*.ico" \
+            --exclude "*.woff*" \
+            --cache-control "no-cache, no-store, must-revalidate"
+
+      # Step 7: JS/CSS/Images upload (1 year cache)
+      - name: Upload static assets to S3
+        run: |
+          aws s3 sync build/ s3://${{ secrets.S3_FRONTEND_BUCKET }}/ \
+            --region ${{ secrets.AWS_REGION }} \
+            --exclude "*.html" \
+            --cache-control "public, max-age=31536000, immutable"
+
+      # Step 8: CloudFront cache clear (नवीन files लगेच दिसाव्यात)
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/*"
+
+      # Step 9: Done — URL print करा
+      - name: Print frontend URL
+        run: |
+          echo "════════════════════════════════════════"
+          echo "✅ Frontend deployed successfully!"
+          echo "🌐 URL: https://$(aws cloudfront get-distribution \
+            --id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --query 'Distribution.DomainName' \
+            --output text)"
+          echo "════════════════════════════════════════"
