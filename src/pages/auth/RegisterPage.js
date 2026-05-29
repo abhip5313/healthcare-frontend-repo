@@ -247,7 +247,7 @@ function RegisterPage() {
                 value={formData.full_name}
                 onChange={handleChange}
                 error={errors.full_name}
-                placeholder="Dr. John Smith"
+                placeholder="Your full name"
                 required
                 icon={
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -264,7 +264,7 @@ function RegisterPage() {
                 value={formData.email}
                 onChange={handleChange}
                 error={errors.email}
-                placeholder="you@example.com"
+                placeholder="abc@gmail.com"
                 required
                 icon={
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -281,7 +281,7 @@ function RegisterPage() {
                 value={formData.phone_number}
                 onChange={handleChange}
                 error={errors.phone_number}
-                placeholder="9876543210"
+                placeholder="your phone number"
                 hint="Optional — 10 to 15 digits"
                 icon={
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
